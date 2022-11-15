@@ -29,7 +29,7 @@ def main(config):
     loss_fn = getattr(module_loss, config['loss'])
     metric_fns = [getattr(module_metric, met) for met in config['metrics']]
 
-    logger.info('Loading checkpoint: {} ...'.format(config.resume))
+    logger.info(f'Loading checkpoint: {config.resume} ...')
     checkpoint = torch.load(config.resume)
     state_dict = checkpoint['state_dict']
     if config['n_gpu'] > 1:
@@ -61,10 +61,11 @@ def main(config):
                 total_metrics[i] += metric(output, target) * batch_size
 
     n_samples = len(data_loader.sampler)
-    log = {'loss': total_loss / n_samples}
-    log.update({
-        met.__name__: total_metrics[i].item() / n_samples for i, met in enumerate(metric_fns)
-    })
+    log = {'loss': total_loss / n_samples} | {
+        met.__name__: total_metrics[i].item() / n_samples
+        for i, met in enumerate(metric_fns)
+    }
+
     logger.info(log)
 
 
